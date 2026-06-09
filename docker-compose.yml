@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+# --- PostgreSQL Database ---
+  postgres:
+    image: postgres:latest
+    container_name: bdm-postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_secure_password
+      POSTGRES_DB: dvd_rental
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/data:/var/lib/postgresql  # <-- Changed here (removed /data on the right)
+
+  # --- pgAdmin (Database GUI) ---
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: bdm-pgadmin-web
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword   # Change this for logging into pgAdmin
+    ports:
+      - "8080:80"
+    volumes:
+      - ./pgadmin/data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+  # --- MinIO (Object Storage) ---
+  minio:
+    image: minio/minio:latest
+    container_name: bdm-minio-storage
+    restart: always
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword  # Change this for security
+    ports:
+      - "9000:9000"       # API port
+      - "9001:9001"       # Web Console port
+    volumes:
+      - ./minio/data:/data
+    command: server /data --console-address ":9001"
