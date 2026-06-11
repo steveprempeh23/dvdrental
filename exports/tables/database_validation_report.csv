@@ -1,0 +1,8 @@
+Table Name,Status,Row Count,Rows with Nulls,Notes
+customer,PASS,599,0,Row count verified. Found 0 rows with null fields.
+rental,PASS,16044,183,Row count verified. Found 183 rows with null fields.
+payment,PASS,14596,0,Row count verified. Found 0 rows with null fields.
+film,PASS,1000,0,Row count verified. Found 0 rows with null fields.
+inventory,PASS,4581,0,Row count verified. Found 0 rows with null fields.
+store,PASS,2,0,Row count verified. Found 0 rows with null fields.
+staff,PASS,2,1,Row count verified. Found 1 rows with null fields.

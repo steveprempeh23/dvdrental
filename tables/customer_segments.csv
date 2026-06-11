@@ -1,0 +1,4 @@
+segment,customer_count,total_revenue,avg_ltv,avg_annualised_clv,avg_payments,avg_rentals
+Low Value,200,15329.62,76.65,388.25,19.69,19.69
+Mid Value,199,19972.79,100.37,499.7,24.23,24.23
+High Value,200,26009.63,130.05,627.0,29.18,29.18

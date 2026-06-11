@@ -1,0 +1,17 @@
+category,avg_turnover,total_copies,dead_stock
+Music,3.58,232,0
+Documentary,3.57,294,1
+Travel,3.56,235,0
+Action,3.56,312,0
+Family,3.54,310,0
+Sci-Fi,3.53,312,0
+Drama,3.53,300,0
+Children,3.51,269,0
+Games,3.51,276,0
+Comedy,3.5,269,0
+Animation,3.48,335,0
+Classics,3.48,270,0
+Foreign,3.44,300,0
+New,3.43,275,0
+Sports,3.43,344,0
+Horror,3.41,248,0

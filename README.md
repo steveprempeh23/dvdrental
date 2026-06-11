@@ -469,7 +469,8 @@ elif page == "💰 Revenue Optimisation":
         TO_CHAR(payment_date, 'Mon YYYY')      AS month_label,
         DATE_TRUNC('month', payment_date)      AS month_date,
         ROUND(SUM(amount)::numeric, 2)         AS revenue,
-        COUNT(payment_id)                      AS transactions
+        COUNT(payment_id)                      AS transactions,
+        EXTRACT(DOW FROM payment_date)::int    AS day_of_week
     FROM payment
     GROUP BY 1,2,3,4
     ORDER BY month_date
@@ -500,15 +501,16 @@ elif page == "💰 Revenue Optimisation":
         section("Revenue by Month-of-Year (Seasonality)")
         seasonal_sql = """
         SELECT
-            EXTRACT(MONTH FROM day)::int          AS month_num,
-            TO_CHAR(day, 'Mon')                   AS month_name,
+            EXTRACT(MONTH FROM payment_date)::int AS month_num,
+            TO_CHAR(payment_date, 'Mon')          AS month_name,
             ROUND(AVG(daily_rev), 2)              AS avg_revenue
         FROM (
             SELECT
                 DATE_TRUNC('day', payment_date) AS day,
-                SUM(amount)                     AS daily_rev
+                payment_date,
+                SUM(amount) AS daily_rev
             FROM payment
-            GROUP BY 1
+            GROUP BY 1, 2
         ) sub
         GROUP BY 1, 2
         ORDER BY 1
@@ -766,17 +768,13 @@ elif page == "🤖 Innovation & Recommendations":
     SELECT
         c.customer_id,
         c.active,
-        COUNT(DISTINCT r.rental_id)                                                AS rental_count,
-        ROUND(SUM(p.amount)::numeric, 2)                                           AS total_spent,
-        ROUND(AVG(p.amount)::numeric, 4)                                           AS avg_payment,
-        MAX(p.payment_date)::date                                                  AS last_payment,
-        EXTRACT(EPOCH FROM (MAX(p.payment_date) - MIN(p.payment_date))) / 86400.0 / 30.0
-                                                                                   AS tenure_months,
+        COUNT(DISTINCT r.rental_id)                              AS rental_count,
+        ROUND(SUM(p.amount)::numeric, 2)                         AS total_spent,
+        ROUND(AVG(p.amount)::numeric, 4)                         AS avg_payment,
+        MAX(p.payment_date)::date                                AS last_payment,
+        (MAX(p.payment_date) - MIN(p.payment_date))::int / 30.0  AS tenure_months,
         COUNT(DISTINCT p.payment_id) * 1.0
-            / NULLIF(
-                EXTRACT(EPOCH FROM (MAX(p.payment_date) - MIN(p.payment_date))) / 86400.0,
-                0
-              )                                                                     AS payment_frequency
+            / NULLIF((MAX(p.payment_date) - MIN(p.payment_date))::int, 0) AS payment_frequency
     FROM customer c
     JOIN payment p ON c.customer_id = p.customer_id
     JOIN rental  r ON p.rental_id   = r.rental_id
@@ -860,7 +858,7 @@ elif page == "🤖 Innovation & Recommendations":
         "🎯 Protect High-Value Customers": "Launch a loyalty programme targeting the top 33% by lifetime value. Offer early access to new titles and personalised discounts.",
         "⚠️ Re-engage At-Risk Customers": "Send personalised re-engagement emails to the 50+ high-risk customers (churn score > 0.66) with a time-limited discount offer.",
         "🎬 Promote High-Priority Categories": "Feature Sports, Sci-Fi, and Animation prominently in store and in any digital communications. These categories combine strong revenue with broad customer appeal.",
-        "📦 Retire Dead Stock": "Review and remove or promote inventory items that have never been rented. See the Inventory page for the full slow-movers list.",
+        "📦 Retire Dead Stock": f"Review and remove or promote the {(run_query('SELECT COUNT(*) AS c FROM inventory i LEFT JOIN rental r ON i.inventory_id = r.inventory_id WHERE r.rental_id IS NULL').iloc[0]['c'])} inventory items that have never been rented.",
         "🏪 Rebalance Inventory Across Stores": "Reallocate copies from the lower revenue-per-inventory store to the more efficient one, particularly for top-performing categories.",
         "📈 Seasonal Promotions": "Run promotional campaigns in months that historically show above-average daily revenue. Align staffing and inventory restocking to match peak periods.",
     }

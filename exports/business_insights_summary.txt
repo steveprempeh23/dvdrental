@@ -1,0 +1,65 @@
+============================================================
+BUSINESS INSIGHTS SUMMARY
+DVD Rental Analytics — DSA5102 Capstone
+Author: Steve Prempeh
+============================================================
+
+CUSTOMER ANALYTICS
+----------------------------------------
+  • CLV — 599 customers analysed.
+  • CLV — Top customer: Eleanor Hunt ($211.55)
+  • CLV — Average LTV: $102.36
+  • CLV — Average annualised CLV: $504.99/year
+  • Segment 'Low Value': 200 customers, avg LTV $76.65, total revenue $15,329.62
+  • Segment 'Mid Value': 199 customers, avg LTV $100.37, total revenue $19,972.79
+  • Segment 'High Value': 200 customers, avg LTV $130.05, total revenue $26,009.63
+  • Churn Risk — Low Risk: 472 customers
+  • Churn Risk — Medium Risk: 127 customers
+  • Churn Risk — High Risk: 0 customers
+  • Churn — 0 customers are High Risk and need immediate re-engagement.
+  • Behaviour — Avg rentals per customer: 26.5
+  • Behaviour — Avg rental duration: 5.0 days
+  • Behaviour — Avg distinct categories per customer: 12.9
+  • Behaviour — Most common favourite category: Animation
+  • Churn Model — Feature weights: Recency 50%, Frequency 30%, Spend 20%
+
+REVENUE OPTIMISATION
+----------------------------------------
+  • Behaviour — Most common favourite category: Animation
+  • Revenue — Top category: Sports ($4,892.19)
+  • Revenue — Bottom category: Music ($3,071.52)
+  • Revenue — Best revenue/rental: Comedy
+  • Temporal — Peak revenue month: Apr 2007 ($28,559.46)
+  • Temporal — Total months of data: 4
+  • Pricing — Correlation between rental rate and total rentals: -0.0540
+  • Pricing — Avg rental rate: $2.98
+  • Pricing — Top revenue/rental film: Hustler Party ($8.67/rental)
+  • Store 1 — Revenue: $9,985,024.66 | Customers: 326 | Rev/Inventory: $4398.69 | Rev/Customer: $30628.91
+  • Store 2 — Revenue: $8,376,494.49 | Customers: 273 | Rev/Inventory: $3624.62 | Rev/Customer: $30683.13
+
+INVENTORY & OPERATIONS
+----------------------------------------
+  • Inventory — Total inventory items: 4581
+  • Inventory — Average turnover rate: 3.52 rentals per copy
+  • Inventory — Zero-rental items: 1
+  • Inventory — Slow-moving (<3 rentals): 1131
+  • Inventory — Slow-moving items exported: 1131
+  • Store 1 — Revenue: $9,985,024.66 | Customers: 326 | Rev/Inventory: $4398.69 | Rev/Customer: $30628.91
+  • Store 2 — Revenue: $8,376,494.49 | Customers: 273 | Rev/Inventory: $3624.62 | Rev/Customer: $30683.13
+
+INNOVATION
+----------------------------------------
+  • Recommendation — High Priority categories: Sports, Animation, Sci-Fi
+  • Recommendation — Score = 60% normalised revenue + 40% normalised rental volume
+  • Churn Model — Feature weights: Recency 50%, Frequency 30%, Spend 20%
+
+============================================================
+KEY RECOMMENDATIONS
+============================================================
+  1. Protect High-Value customers with a loyalty programme (early access, personalised discounts).
+  2. Re-engage High Risk churn customers immediately with a time-limited discount campaign.
+  3. Prioritise stock investment and promotion in High Priority categories: Sports, Animation, Sci-Fi.
+  4. Review or retire the 1 inventory items with zero rentals.
+  5. Rebalance inventory between stores based on revenue-per-inventory-item efficiency ratios.
+  6. Run promotional campaigns during peak seasonal months identified in the temporal analysis.
+  7. Extend the recommendation engine to customer-level collaborative filtering as a next step.
