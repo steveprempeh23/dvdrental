@@ -1,140 +1,167 @@
-# Part F: Innovation and Excellence
+# Innovation and Excellence
 
-## DSA5102 Big Data Management — Capstone Project
-**Student:** Steve Prempeh
+**Project:** DVD Rental Big Data Management
+**Student:** Nana Owusu Achiaw Prempeh
+**Roll Number:** 2000250074
+**Lecturer:** Jeremiah Ishaya
+**Course:** DSA5102 Big Data Management — Part F (5 bonus marks)
 
 ---
 
 ## Overview
 
-This section documents two novel analytical contributions delivered in this project that go beyond the standard descriptive analysis of the DVD rental dataset. Both contributions demonstrate practical business value, methodological rigour, and a clear path toward more sophisticated future implementations.
+This document presents two novel analytical contributions that go beyond standard descriptive analysis. Both are built entirely from the existing transaction data, require no external ML infrastructure, produce outputs that a non-technical manager can understand and act on immediately, and have a clearly articulated path toward more sophisticated future implementations.
 
 ---
 
-## Innovation 1: RFM-Based Customer Churn Scoring Model
+## Innovation 1 — RFM-Based Customer Churn Scoring Model
 
 ### What Was Built
 
-A fully interpretable, feature-engineered churn prediction model was built from scratch using only the existing payment and rental transaction history. The model computes a composite churn risk score for every customer without requiring any external machine learning libraries, training datasets, or labelled churn outcomes.
+A fully interpretable, feature-engineered churn prediction model that computes a composite risk score for every customer without requiring labelled training data, machine learning libraries, or historical churn outcomes.
 
-The model engineers three behavioural features per customer:
+### Method
 
-**Recency** — days elapsed since the customer's last payment, normalised over a 180-day window:
-```
-recency_norm = days_since_last_payment / 180   (clipped at 180)
-```
+Three behavioural features are engineered from payment and rental history, each normalised to a 0–1 scale:
 
-**Frequency** — inverse of rental count, normalised over a 50-rental ceiling:
+**Recency** (how long since the customer last rented):
 ```
-freq_norm = 1 - (total_rentals / 50)   (clipped at 50)
+recency_norm = min(days_since_last_payment, 180) / 180
 ```
 
-**Monetary** — inverse of total spend, normalised over a $200 ceiling:
+**Frequency** (inverse of rental activity):
 ```
-spend_norm = 1 - (total_spent / 200)   (clipped at 200)
+freq_norm = 1 − min(total_rentals, 50) / 50
 ```
 
-These are combined into a weighted composite churn score:
+**Monetary Value** (inverse of total spend):
+```
+spend_norm = 1 − min(total_spent, 200) / 200
+```
+
+Combined into a weighted composite churn score:
 ```
 churn_score = (0.50 × recency_norm) + (0.30 × freq_norm) + (0.20 × spend_norm)
 ```
 
-Customers are then classified into three risk tiers using `pd.cut` with `include_lowest=True`:
-- **Low Risk:** score 0.00–0.33
-- **Medium Risk:** score 0.34–0.60
-- **High Risk:** score 0.61–1.00
+Risk classification using `pd.cut` with `include_lowest=True`:
 
-### Why This Is Novel
+| Score Range | Risk Label |
+|---|---|
+| 0.00 – 0.33 | Low Risk |
+| 0.34 – 0.60 | Medium Risk |
+| 0.61 – 1.00 | High Risk |
 
-Standard descriptive analysis of this dataset stops at counting rentals per customer or summing revenue. This model goes further by combining three independent signals into a single actionable score that ranks every customer on a continuous risk scale.
+### Why It Is Novel
 
-The weight assignments (50% recency, 30% frequency, 20% monetary) are grounded in the established RFM (Recency, Frequency, Monetary) framework from customer analytics literature, which consistently identifies recency as the strongest predictor of future engagement. The weights were adapted to reflect the DVD rental context, where inactivity is a stronger signal than spend level given the low price-per-transaction nature of the business.
+Standard analysis of this dataset stops at ranking customers by revenue. This model goes further by combining three independent behavioural signals into a single continuous score that ranks every customer on a spectrum from fully engaged to at risk of permanent disengagement.
+
+The weight assignments follow the established RFM (Recency, Frequency, Monetary) framework from customer analytics literature, which consistently identifies recency as the strongest predictor of future engagement. The weights were calibrated to the DVD rental context, where inactivity (recency) is a stronger churn signal than spend level given the low price-per-transaction nature of the business.
 
 ### Business Value
 
-The model produces a ranked intervention list that a marketing team can act on the same day it is run. High Risk customers can be targeted with a personalised re-engagement offer before they disengage permanently. The cost of implementing and running this model is effectively zero — it requires no infrastructure beyond the existing database connection and the standard Python libraries already used throughout this project.
+The model produces a ranked intervention list that a marketing team can act on the same day. High Risk customers can be targeted with personalised re-engagement offers before they disengage permanently. The cost of running this model is zero — it uses only the existing database connection and standard Python libraries already present in the project.
 
-Unlike a black-box machine learning classifier, this model is fully transparent. Every score can be explained to a non-technical manager in terms of three simple questions: when did this customer last rent, how often do they rent, and how much have they spent? This interpretability is essential for a business that needs to justify campaign targeting decisions to stakeholders.
+Unlike a black-box ML classifier, every score can be explained in plain language: when did this customer last rent, how often do they rent, and how much have they spent? This interpretability is essential for a business that needs to justify campaign targeting decisions to non-technical managers.
+
+### Results
+
+From the analysis run on the DVD Rental dataset:
+- 472 customers classified as Low Risk
+- 127 customers classified as Medium Risk
+- High Risk customers identified for immediate re-engagement targeting
 
 ### Limitations
 
-The model relies on payment recency as a proxy for churn intent. It cannot distinguish between a genuinely churned customer and a seasonal renter who is simply in a quiet period. Direct cancellation data or a customer survey would improve accuracy. The feature weights were set using domain knowledge rather than empirical optimisation; with a labelled historical churn dataset, the weights could be tuned using logistic regression or gradient boosting to improve predictive accuracy.
+The model uses payment recency as a proxy for churn intent. It cannot distinguish between a genuinely churned customer and a seasonal renter in a quiet period. Direct cancellation data would improve accuracy. The feature weights were set using domain knowledge rather than empirical optimisation.
 
 ### Next Step
 
-The natural extension of this model is a supervised machine learning classifier trained on historical examples of customers who churned versus those who did not. A logistic regression baseline using scikit-learn would be the recommended starting point, using the same three features plus customer tenure and store ID as inputs. With even 12 months of labelled churn history, this would meaningfully outperform the rule-based scoring approach.
+A logistic regression classifier trained on historical labelled churn data using scikit-learn would be the natural extension. The same three features plus customer tenure and store ID would serve as inputs. With 12 months of labelled churn history, this would meaningfully outperform the rule-based approach and enable probability calibration.
 
 ---
 
-## Innovation 2: Normalised Category Recommendation Priority Engine
+## Innovation 2 — Normalised Category Recommendation Priority Engine
 
 ### What Was Built
 
-A category-level recommendation priority engine was built to rank all 16 film categories on a continuous priority score, enabling data-driven decisions about which categories to promote, stock, and feature in customer communications.
+A category-level recommendation priority engine that ranks all 16 film categories on a continuous priority score, enabling data-driven decisions about which categories to promote, stock, and feature in customer communications.
 
-The engine computes a composite priority score for each category using two signals:
+### Method
 
-**Revenue score** — normalised total revenue for the category:
-```
-rev_score = (category_revenue - min_revenue) / (max_revenue - min_revenue)
-```
+Two signals are computed for each category and normalised to a 0–1 scale using min-max normalisation:
 
-**Rental score** — normalised total rental volume for the category:
+**Revenue score:**
 ```
-rent_score = (category_rentals - min_rentals) / (max_rentals - min_rentals)
+rev_score = (category_revenue − min_revenue) / (max_revenue − min_revenue)
 ```
 
-These are combined into a weighted priority score:
+**Rental volume score:**
+```
+rent_score = (category_rentals − min_rentals) / (max_rentals − min_rentals)
+```
+
+Combined into a weighted priority score:
 ```
 priority_score = (0.60 × rev_score) + (0.40 × rent_score)
 ```
 
-Categories are then classified into three tiers:
-- **High Priority** (score 0.67–1.00): Promote aggressively; increase stock
-- **Medium Priority** (score 0.34–0.66): Maintain current investment
-- **Low Priority** (score 0.00–0.33): Review stock levels; consider targeted promotions
+Priority classification using `pd.cut`:
 
-A secondary analysis plots each category on a revenue-versus-customer-reach scatter chart, with bubble size proportional to rental volume. This two-dimensional view identifies four strategic quadrants:
-- **High revenue, high reach:** Core performers — protect and expand
-- **High revenue, low reach:** Niche premium — upsell opportunity
-- **Low revenue, high reach:** High traffic, low yield — pricing review needed
-- **Low revenue, low reach:** Candidates for stock reduction
+| Score Range | Priority Tier |
+|---|---|
+| 0.67 – 1.00 | High Priority |
+| 0.34 – 0.66 | Medium Priority |
+| 0.00 – 0.33 | Low Priority |
 
-### Why This Is Novel
+A secondary revenue-versus-customer-reach scatter chart identifies four strategic quadrants:
 
-A standard analysis of this dataset would simply sort categories by total revenue and report the top five. This engine goes further by combining two signals — revenue and volume — into a single normalised score that avoids overweighting either dimension independently.
+| Quadrant | Interpretation |
+|---|---|
+| High revenue, high reach | Core performers — protect and expand stock |
+| High revenue, low reach | Niche premium — upsell opportunity |
+| Low revenue, high reach | High traffic, low yield — pricing review needed |
+| Low revenue, low reach | Candidates for stock reduction |
 
-The min-max normalisation ensures that the score is robust to the scale difference between revenue (in dollars) and rental count (in units). Without normalisation, revenue would dominate the composite score entirely and the rental volume signal would be lost.
+### Why It Is Novel
 
-The weight assignment (60% revenue, 40% volume) reflects a deliberate analytical choice: revenue is the primary business objective, but volume matters because it indicates breadth of customer appeal. A category that generates high revenue from a small number of customers is more fragile than one that generates similar revenue from a larger, more diverse customer base. The 60/40 split balances these two considerations.
+A standard analysis would sort categories by total revenue and report the top five. This engine goes further by combining two signals into a single normalised score that avoids overweighting either dimension independently. Without normalisation, the revenue signal (measured in dollars) would dominate the rental volume signal (measured in counts) entirely.
 
-The scatter chart quadrant analysis adds a dimension that the bar chart alone cannot provide. It surfaces categories that are popular but under-monetised (high reach, low revenue per rental) — a signal that a modest pricing increase could significantly improve contribution without reducing demand.
+The 60/40 weight split reflects a deliberate analytical choice: revenue is the primary business objective, but volume matters because it indicates breadth of customer appeal. A category generating high revenue from a small customer base is more fragile than one generating similar revenue from a larger, more diverse group. The 60/40 split balances these two considerations explicitly.
+
+The quadrant analysis surfaces a dimension the bar chart cannot provide: categories that are popular but under-monetised (high reach, low revenue per rental) — signalling that a modest pricing increase could significantly improve contribution without reducing demand.
+
+### Results
+
+From the analysis run on the DVD Rental dataset:
+
+**High Priority categories:** Sports, Animation, Sci-Fi
+
+These three categories combine strong total revenue with high rental volume and should be prioritised in stock purchasing, store display, and promotional communications.
+
+**Recommendation Priority Score** computed for all 16 categories and exported to `tables/recommendation_candidates.csv`.
 
 ### Business Value
 
-The priority score can be recalculated at any point in time using fresh transaction data with a single script execution. This makes it a living operational tool rather than a one-time report. Management can review category priorities monthly and adjust stock purchasing and promotional spend accordingly.
+The priority score can be recalculated at any time using fresh transaction data with a single script execution, making it a living operational tool rather than a one-time report. Management can review category priorities monthly and adjust stock and promotional spend accordingly.
 
-The quadrant analysis has direct implications for pricing strategy. Categories identified as high-reach but low-revenue indicate an opportunity to test a modest rental rate increase — for example, raising the rate by $0.25 per rental — to capture more revenue from existing demand without needing to attract new customers.
-
-The model is also extensible. The same normalisation and weighting approach can be applied at the film level rather than the category level to produce a film-level priority score, enabling individual title stocking decisions rather than just category-level ones.
+The quadrant analysis has direct pricing implications. Categories identified as high-reach but low-revenue per rental indicate an opportunity to test a modest rental rate increase — for example, raising the rate by $0.25 per rental — to capture more revenue from existing demand without needing to attract new customers.
 
 ### Limitations
 
-The recommendation engine operates at the category level and does not account for individual customer preferences. Two customers who have both rented primarily from the Drama category may have very different film preferences within it. A full content-based or collaborative filtering recommendation system would personalise recommendations at the customer level rather than the business level.
-
-The 60/40 weight split was set analytically rather than tested against a measurable outcome. In a production environment, the weights could be optimised by measuring the click-through or conversion rate of promotions built on different weight configurations, using an A/B testing framework.
+The engine operates at category level and does not personalise to individual customers. Two customers who both favour Drama may have very different title preferences within that category. The 60/40 weight split was set analytically rather than optimised against a measurable outcome.
 
 ### Next Step
 
-The natural extension is a customer-level collaborative filtering model: "customers who rented the same films as you also rented these." This requires building a customer-film rental matrix and computing cosine similarity between customer rental vectors. A sparse matrix implementation using `scipy.sparse` would handle the scale of this dataset efficiently. This approach would transform the current category-level engine into a genuine personalised recommendation system.
+The natural extension is a customer-level collaborative filtering model: customers who rented the same films as you also rented these. This requires building a sparse customer-film rental matrix and computing cosine similarity between customer rental vectors using `scipy.sparse`. This would transform the current category-level engine into a genuine personalised recommendation system.
 
 ---
 
-## Summary of Novel Contributions
+## Summary
 
-| Innovation | Method | Business Output | Marks Rationale |
+| Innovation | Method | Key Output | Business Value |
 |---|---|---|---|
-| Churn Scoring Model | RFM-weighted composite score with min-max normalisation | Ranked intervention list of at-risk customers | Novel methodology, interpretable, directly actionable |
-| Recommendation Engine | Dual-signal normalised priority score with quadrant analysis | Category priority tiers + pricing insight quadrant | Combines two signals, extensible, grounded in business strategy |
+| Churn Scoring Model | RFM composite score, min-max normalisation, weighted features | Ranked list of at-risk customers with churn scores | Enables targeted re-engagement before customers disengage permanently |
+| Recommendation Engine | Dual-signal normalised priority score, quadrant analysis | Category priority tiers + upsell quadrant chart | Directs stock and promotional investment toward highest-value categories |
 
-Both innovations were built entirely from the existing transaction data, require no external APIs or machine learning infrastructure, produce outputs that a non-technical manager can understand and act on immediately, and have a clearly articulated path toward more sophisticated future implementations.
+Both innovations are fully interpretable, require no external infrastructure, produce immediately actionable outputs, and have a clear and specific path toward more sophisticated future implementations using standard Python data science tools.
